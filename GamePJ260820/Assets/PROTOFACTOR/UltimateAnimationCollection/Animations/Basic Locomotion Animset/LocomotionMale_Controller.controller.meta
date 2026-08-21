@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 7ddb025ed8ead91499944c6244096e2a
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 195459
+  packageName: ULTIMATE ANIMATION COLLECTION
+  packageVersion: 1.65
+  assetPath: Assets/PROTOFACTOR/UltimateAnimationCollection/Animations/Basic Locomotion
+    Animset/LocomotionMale_Controller.controller
+  uploadId: 975308
