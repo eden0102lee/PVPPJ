@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: d885d774b9afd2a49988db88e226c00f
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 355960
+  packageName: CombatGirls_SwordShieldCharacterPack
+  packageVersion: 1.3.1
+  assetPath: Assets/CombatGirlsCharacterPack/CombatGirl_Shield/Materials/Weapon/Weapon_Shield_Axe_03.mat
+  uploadId: 974178

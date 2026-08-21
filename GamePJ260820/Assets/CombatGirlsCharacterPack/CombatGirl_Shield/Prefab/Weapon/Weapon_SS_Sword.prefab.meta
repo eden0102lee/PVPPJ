@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 830186b9bfa8fe94bb4b1fa52e5bdc40
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 355960
+  packageName: CombatGirls_SwordShieldCharacterPack
+  packageVersion: 1.3.1
+  assetPath: Assets/CombatGirlsCharacterPack/CombatGirl_Shield/Prefab/Weapon/Weapon_SS_Sword.prefab
+  uploadId: 974178

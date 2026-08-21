@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 68061df38cfc9ce45973223e3525d5b1
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 355960
+  packageName: CombatGirls_SwordShieldCharacterPack
+  packageVersion: 1.3.1
+  assetPath: Assets/CombatGirlsCharacterPack/CombatGirl_Shield/Materials/Squire_Cloth/Squire_Cloth.mat
+  uploadId: 974178

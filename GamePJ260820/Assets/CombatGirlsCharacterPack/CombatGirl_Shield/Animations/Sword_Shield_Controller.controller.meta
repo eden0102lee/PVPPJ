@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 215fa1342fa8df5449c1b32aaf91f9f0
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 355960
+  packageName: CombatGirls_SwordShieldCharacterPack
+  packageVersion: 1.3.1
+  assetPath: Assets/CombatGirlsCharacterPack/CombatGirl_Shield/Animations/Sword_Shield_Controller.controller
+  uploadId: 974178
