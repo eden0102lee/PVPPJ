@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 4ff560aba6ce0c54eb4b20c84dab7b91
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 195459
+  packageName: ULTIMATE ANIMATION COLLECTION
+  packageVersion: 1.65
+  assetPath: Assets/PROTOFACTOR/UltimateAnimationCollection/Animations/2Handed Gun
+    Animset/2HandedGun_Controller.controller
+  uploadId: 975308
