@@ -142,6 +142,17 @@ namespace GamePJ.Arena
                 hero.GetComponent<CombatActor>(),
                 hero.GetComponent<P09EquipmentController>(),
                 hero.GetComponent<AttackRangeVisualizer>());
+
+            var cooldownDisplay = hero.GetComponent<SkillCooldownHeadDisplay>();
+            if (cooldownDisplay == null)
+            {
+                cooldownDisplay = hero.gameObject.AddComponent<SkillCooldownHeadDisplay>();
+            }
+
+            cooldownDisplay.Bind(
+                hero.GetComponent<TalentLoadout>(),
+                hero.GetComponent<CombatCaster>(),
+                gameplayCamera);
         }
 
         public static void ConfigureHero(GameObject heroGo)
@@ -174,6 +185,11 @@ namespace GamePJ.Arena
             if (heroGo.GetComponent<AttackRangeVisualizer>() == null)
             {
                 heroGo.AddComponent<AttackRangeVisualizer>();
+            }
+
+            if (heroGo.GetComponent<SkillCooldownHeadDisplay>() == null)
+            {
+                heroGo.AddComponent<SkillCooldownHeadDisplay>();
             }
         }
 

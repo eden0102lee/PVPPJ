@@ -97,18 +97,37 @@ namespace GamePJ.UI
                 CombatLog.Push(rangeVisualizer.Visible ? "攻擊範圍顯示：開" : "攻擊範圍顯示：關");
             }
 
-            if (equipment != null && input != null)
+            if (loadout != null && input != null)
             {
                 if (input.WeaponPrevPressedThisFrame)
                 {
-                    equipment.CycleWeapon(-1);
-                    CombatLog.Push($"換武器 → {equipment.WeaponLabel}");
+                    loadout.CycleEquippedWeapon(0, -1);
+                    CombatLog.Push($"主武器 → {WeaponProfileCatalog.Get(loadout.Build.PrimaryWeapon).DisplayName}");
                 }
 
                 if (input.WeaponNextPressedThisFrame)
                 {
-                    equipment.CycleWeapon(1);
-                    CombatLog.Push($"換武器 → {equipment.WeaponLabel}");
+                    loadout.CycleEquippedWeapon(0, 1);
+                    CombatLog.Push($"主武器 → {WeaponProfileCatalog.Get(loadout.Build.PrimaryWeapon).DisplayName}");
+                }
+
+                if (input.SecondaryWeaponPrevPressedThisFrame)
+                {
+                    loadout.CycleEquippedWeapon(1, -1);
+                    CombatLog.Push($"副武器 → {WeaponProfileCatalog.Get(loadout.Build.SecondaryWeapon).DisplayName}");
+                }
+
+                if (input.SecondaryWeaponNextPressedThisFrame)
+                {
+                    loadout.CycleEquippedWeapon(1, 1);
+                    CombatLog.Push($"副武器 → {WeaponProfileCatalog.Get(loadout.Build.SecondaryWeapon).DisplayName}");
+                }
+            }
+            else if (equipment != null && input != null)
+            {
+                if (input.WeaponPrevPressedThisFrame || input.WeaponNextPressedThisFrame)
+                {
+                    CombatLog.Push($"武器：{equipment.WeaponLabel}");
                 }
             }
 
@@ -153,8 +172,8 @@ namespace GamePJ.UI
                 new Rect(12f, Screen.height - 128f, 760f, 116f),
                 "WASD 移動　滑鼠面向　左鍵續力/攻擊1　右鍵攻擊2　Q/E/R 攻擊3-5\n" +
                 "Shift 閃避　Space 格擋　Tab 天賦樹　F 重置　G 沙包自動攻擊　H 沙包格擋\n" +
-                "- = 換武器　V 攻擊範圍顯示　外觀裝備請至 P09 Demo.unity\n" +
-                "改動作／詞條後立即生效，攻擊沙包即可驗證傷害、異常、續力與破防。",
+                "- = 主武器　[ ] 副武器　V 攻擊範圍顯示　外觀裝備請至 P09 Demo.unity\n" +
+                "每槽技能需綁定主/副武器；動作必須符合該武器允許的類型。",
                 style);
         }
 
@@ -189,6 +208,7 @@ namespace GamePJ.UI
             GUILayout.BeginArea(new Rect(talentRect.x + 10f, talentRect.y + 28f, talentRect.width - 20f, talentRect.height - 36f));
 
             GUILayout.Label($"3 選 2：攻擊5 / 閃避 / 格擋 目前啟用 {loadout?.Build.CountChoiceSlots() ?? 0}/2", LabelStyle(12));
+            DrawWeaponLoadoutRow();
             GUILayout.BeginHorizontal();
             DrawSlotButton(ActionSlotId.Attack1);
             DrawSlotButton(ActionSlotId.Attack2);
@@ -210,6 +230,15 @@ namespace GamePJ.UI
             }
 
             var entry = loadout.Build.GetSlot(selectedSlot);
+            var resolved = loadout.Resolve(selectedSlot);
+            GUILayout.Label("綁定武器", LabelStyle(13));
+            DrawCycleRow(
+                CurrentBoundWeaponLabel(entry, loadout.Build),
+                () => loadout.CycleBoundWeapon(selectedSlot, -1),
+                () => loadout.CycleBoundWeapon(selectedSlot, 1),
+                null);
+
+            GUILayout.Space(4f);
             GUILayout.Label("動作本體", LabelStyle(13));
             DrawCycleRow(
                 CurrentActionLabel(entry),
@@ -217,7 +246,14 @@ namespace GamePJ.UI
                 () => CycleAction(selectedSlot, 1),
                 () => loadout.SetAction(selectedSlot, string.Empty));
 
-            var resolved = loadout.Resolve(selectedSlot);
+            GUILayout.Space(4f);
+            GUILayout.Label("套用動畫", LabelStyle(13));
+            DrawCycleRow(
+                CurrentAnimationLabel(entry, resolved),
+                () => CycleAnimation(selectedSlot, -1),
+                () => CycleAnimation(selectedSlot, 1),
+                () => loadout.SetAnimation(selectedSlot, string.Empty));
+
             GUILayout.Label(resolved.Summary(), LabelStyle(12));
             GUILayout.Space(4f);
             GUILayout.Label("修飾詞條（最多 4，可重複疊加）", LabelStyle(13));
@@ -260,12 +296,15 @@ namespace GamePJ.UI
                 return;
             }
 
-            var weaponRange = equipment != null
-                ? equipment.WeaponMaxRange
-                : CombatRangeRules.MeleeWeaponMaxRange;
+            if (!resolved.WeaponCompatible)
+            {
+                GUILayout.Label($"⚠ 綁定武器「{resolved.BoundWeaponName}」不允許此動作。", LabelStyle(12));
+            }
+
+            var weaponRange = resolved.WeaponRange;
             var lines = new List<string>
             {
-                $"前搖 {resolved.Startup:0.00}s　CD {resolved.Cooldown:0.00}s　武器射程 {weaponRange:0.0}m"
+                $"武器 [{resolved.BoundWeaponName}]　前搖 {resolved.Startup:0.00}s　基礎 CD {resolved.Cooldown:0.00}s　射程 {weaponRange:0.0}m"
             };
 
             if (heroActor != null)
@@ -338,6 +377,32 @@ namespace GamePJ.UI
             };
         }
 
+        void DrawWeaponLoadoutRow()
+        {
+            if (loadout == null)
+            {
+                return;
+            }
+
+            var primary = WeaponProfileCatalog.Get(loadout.Build.PrimaryWeapon);
+            var secondary = WeaponProfileCatalog.Get(loadout.Build.SecondaryWeapon);
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button($"主：{primary.DisplayName} ({primary.Range:0.0}m)", GUILayout.Height(28f)))
+            {
+                loadout.CycleEquippedWeapon(0, 1);
+            }
+
+            if (GUILayout.Button($"副：{secondary.DisplayName} ({secondary.Range:0.0}m)", GUILayout.Height(28f)))
+            {
+                loadout.CycleEquippedWeapon(1, 1);
+            }
+
+            GUILayout.EndHorizontal();
+            GUILayout.Label($"主加成：{primary.BonusSummary()}　副加成：{secondary.BonusSummary()}", LabelStyle(11));
+            GUILayout.Label($"主技能：{primary.AllowedActionsSummary()}　副技能：{secondary.AllowedActionsSummary()}", LabelStyle(11));
+            GUILayout.Space(4f);
+        }
+
         void DrawCycleRow(string label, System.Action prev, System.Action next, System.Action clear)
         {
             GUILayout.BeginHorizontal();
@@ -352,9 +417,13 @@ namespace GamePJ.UI
                 next();
             }
 
-            if (GUILayout.Button("清", GUILayout.Width(32f)))
+            if (clear != null && GUILayout.Button("清", GUILayout.Width(32f)))
             {
                 clear();
+            }
+            else if (clear == null)
+            {
+                GUILayout.Space(36f);
             }
 
             GUILayout.EndHorizontal();
@@ -362,8 +431,10 @@ namespace GamePJ.UI
 
         void CycleAction(ActionSlotId slot, int delta)
         {
+            var entry = loadout.Build.GetSlot(slot);
+            var weapon = loadout.Build.GetBoundWeapon(entry);
             var options = new List<string> { string.Empty };
-            foreach (var action in ActionCatalog.ForSlot(slot))
+            foreach (var action in ActionCatalog.ForSlot(slot, weapon))
             {
                 options.Add(action.Id);
             }
@@ -385,6 +456,27 @@ namespace GamePJ.UI
             CombatLog.Push("無法啟用：攻擊5／閃避／格擋最多 3 選 2");
         }
 
+        void CycleAnimation(ActionSlotId slot, int delta)
+        {
+            var options = new List<string> { string.Empty };
+            foreach (var animation in ActionAnimationCatalog.All)
+            {
+                options.Add(animation.Id);
+            }
+
+            var current = loadout.Build.GetSlot(slot)?.AnimationId ?? string.Empty;
+            var index = Mathf.Max(0, options.IndexOf(current));
+            index = (index + delta + options.Count) % options.Count;
+            var id = options[index];
+            if (loadout.SetAnimation(slot, id))
+            {
+                var name = string.IsNullOrEmpty(id)
+                    ? "（動作預設）"
+                    : ActionAnimationCatalog.Get(id)?.DisplayName ?? id;
+                CombatLog.Push($"{slot.DisplayName()} 動畫 → {name}");
+            }
+        }
+
         void CycleModifier(ActionSlotId slot, int modifierIndex, int delta)
         {
             var options = new List<string> { string.Empty };
@@ -404,6 +496,18 @@ namespace GamePJ.UI
             }
         }
 
+        static string CurrentBoundWeaponLabel(SlotBuild entry, TalentBuild build)
+        {
+            if (entry == null || build == null)
+            {
+                return "主武器";
+            }
+
+            var weapon = build.GetEquippedWeapon(entry.BoundWeaponSlot);
+            var slotLabel = entry.BoundWeaponSlot == 1 ? "副" : "主";
+            return $"{slotLabel}：{weapon.DisplayName} ({weapon.Range:0.0}m)";
+        }
+
         static string CurrentActionLabel(SlotBuild entry)
         {
             if (entry == null || !entry.HasAction)
@@ -413,6 +517,28 @@ namespace GamePJ.UI
 
             var action = ActionCatalog.Get(entry.ActionId);
             return action == null ? entry.ActionId : $"{action.DisplayName} ({action.Attribute.ShortName()})";
+        }
+
+        static string CurrentAnimationLabel(SlotBuild entry, ResolvedAction resolved)
+        {
+            if (entry == null || !entry.HasAction)
+            {
+                return "（空）";
+            }
+
+            if (!string.IsNullOrEmpty(entry.AnimationId))
+            {
+                var picked = ActionAnimationCatalog.Get(entry.AnimationId);
+                return picked == null
+                    ? entry.AnimationId
+                    : $"{picked.DisplayName} ({picked.StateName})";
+            }
+
+            var action = ActionCatalog.Get(entry.ActionId);
+            var fallback = action != null ? ActionAnimationCatalog.Get(action.DefaultAnimationId) : null;
+            return fallback == null
+                ? resolved?.AnimationStateName ?? "Attack"
+                : $"{fallback.DisplayName}（預設）";
         }
 
         static string CurrentModifierLabel(SlotBuild entry, int index)

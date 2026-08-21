@@ -12,7 +12,71 @@ namespace GamePJ.Modules
         public ResolvedAction Resolve(ActionSlotId slot)
         {
             var entry = Build.GetSlot(slot);
-            return entry == null ? new ResolvedAction { Slot = slot } : TalentResolver.Resolve(entry);
+            if (entry == null)
+            {
+                return new ResolvedAction { Slot = slot };
+            }
+
+            var weapon = Build.GetBoundWeapon(entry);
+            return TalentResolver.Resolve(entry, weapon);
+        }
+
+        public bool SetEquippedWeapon(int weaponSlot, WeaponArchetype archetype)
+        {
+            if (weaponSlot == (int)WeaponLoadoutSlot.Secondary)
+            {
+                Build.SecondaryWeapon = archetype;
+            }
+            else
+            {
+                Build.PrimaryWeapon = archetype;
+            }
+
+            SanitizeInvalidActions();
+            NotifyChanged();
+            return true;
+        }
+
+        public bool CycleEquippedWeapon(int weaponSlot, int delta)
+        {
+            var options = new System.Collections.Generic.List<WeaponArchetype>();
+            foreach (var archetype in WeaponProfileCatalog.Archetypes())
+            {
+                options.Add(archetype);
+            }
+
+            var current = weaponSlot == (int)WeaponLoadoutSlot.Secondary
+                ? Build.SecondaryWeapon
+                : Build.PrimaryWeapon;
+            var index = Mathf.Max(0, options.IndexOf(current));
+            index = (index + delta + options.Count) % options.Count;
+            return SetEquippedWeapon(weaponSlot, options[index]);
+        }
+
+        public bool SetBoundWeapon(ActionSlotId slot, int weaponSlot)
+        {
+            var entry = Build.GetSlot(slot);
+            if (entry == null)
+            {
+                return false;
+            }
+
+            entry.BoundWeaponSlot = Mathf.Clamp(weaponSlot, 0, 1);
+            SanitizeInvalidActions();
+            NotifyChanged();
+            return true;
+        }
+
+        public bool CycleBoundWeapon(ActionSlotId slot, int delta)
+        {
+            var entry = Build.GetSlot(slot);
+            if (entry == null)
+            {
+                return false;
+            }
+
+            var next = (entry.BoundWeaponSlot + delta + 2) % 2;
+            return SetBoundWeapon(slot, next);
         }
 
         public bool SetAction(ActionSlotId slot, string actionId)
@@ -41,7 +105,38 @@ namespace GamePJ.Modules
                 return false;
             }
 
+            var weapon = Build.GetBoundWeapon(entry);
+            if (!weapon.AllowsAction(definition))
+            {
+                return false;
+            }
+
             entry.ActionId = actionId;
+            NotifyChanged();
+            return true;
+        }
+
+        public bool SetAnimation(ActionSlotId slot, string animationId)
+        {
+            var entry = Build.GetSlot(slot);
+            if (entry == null)
+            {
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(animationId))
+            {
+                entry.AnimationId = string.Empty;
+                NotifyChanged();
+                return true;
+            }
+
+            if (ActionAnimationCatalog.Get(animationId) == null)
+            {
+                return false;
+            }
+
+            entry.AnimationId = animationId;
             NotifyChanged();
             return true;
         }
@@ -81,6 +176,24 @@ namespace GamePJ.Modules
             entry.ModifierIds[index] = modifierId;
             NotifyChanged();
             return true;
+        }
+
+        void SanitizeInvalidActions()
+        {
+            foreach (var entry in Build.Slots)
+            {
+                if (entry == null || !entry.HasAction)
+                {
+                    continue;
+                }
+
+                var weapon = Build.GetBoundWeapon(entry);
+                var action = ActionCatalog.Get(entry.ActionId);
+                if (action == null || !weapon.AllowsAction(action))
+                {
+                    entry.ActionId = string.Empty;
+                }
+            }
         }
 
         void NotifyChanged()

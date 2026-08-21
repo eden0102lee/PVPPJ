@@ -3905,7 +3905,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 1781405041}
-  offset: {x: 0, y: 14, z: -12}
+  offset: {x: 0, y: 2.8, z: -2.4}
   followSmooth: 8
   lookAhead: 0.35
 --- !u!114 &677402540
@@ -10701,6 +10701,7 @@ MonoBehaviour:
     Slots:
     - Slot: 0
       ActionId: act_slash_str
+      AnimationId: 
       ModifierIds:
       - mod_stun_str
       - 
@@ -10708,6 +10709,7 @@ MonoBehaviour:
       - 
     - Slot: 1
       ActionId: act_thrust_agi
+      AnimationId: 
       ModifierIds:
       - 
       - 
@@ -10715,6 +10717,7 @@ MonoBehaviour:
       - 
     - Slot: 2
       ActionId: 
+      AnimationId: 
       ModifierIds:
       - 
       - 
@@ -10722,6 +10725,7 @@ MonoBehaviour:
       - 
     - Slot: 3
       ActionId: 
+      AnimationId: 
       ModifierIds:
       - 
       - 
@@ -10729,6 +10733,7 @@ MonoBehaviour:
       - 
     - Slot: 4
       ActionId: 
+      AnimationId: 
       ModifierIds:
       - 
       - 
@@ -10736,6 +10741,7 @@ MonoBehaviour:
       - 
     - Slot: 5
       ActionId: act_roll_dodge_agi
+      AnimationId: 
       ModifierIds:
       - 
       - 
@@ -10743,6 +10749,7 @@ MonoBehaviour:
       - 
     - Slot: 6
       ActionId: 
+      AnimationId: 
       ModifierIds:
       - 
       - 

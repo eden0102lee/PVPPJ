@@ -86,6 +86,7 @@ namespace GamePJ.Combat
         float stanceDamageBonus;
         float riposteUntil;
         readonly float[] cooldownUntil = new float[7];
+        readonly float[] cooldownTotal = new float[7];
 
         public float Charge01 { get; private set; }
         public bool IsCharging => isCharging;
@@ -145,6 +146,8 @@ namespace GamePJ.Combat
             status?.Clear();
             isCharging = false;
             Charge01 = 0f;
+            System.Array.Clear(cooldownUntil, 0, cooldownUntil.Length);
+            System.Array.Clear(cooldownTotal, 0, cooldownTotal.Length);
         }
 
         void Update()
@@ -154,7 +157,9 @@ namespace GamePJ.Combat
                 return;
             }
 
-            motor?.SetMoveSpeedMultiplier(status != null ? status.MoveSpeedMultiplier : 1f);
+            motor?.SetMoveSpeedMultiplier(
+                (status != null ? status.MoveSpeedMultiplier : 1f) *
+                (loadout != null ? loadout.Build.CombinedMoveSpeedMultiplier() : 1f));
             motor?.SetMovementLocked(status != null && status.MovementLocked);
 
             InIFrames = motor != null && motor.IsDashing;
@@ -247,6 +252,12 @@ namespace GamePJ.Combat
                     continue;
                 }
 
+                if (!resolved.WeaponCompatible)
+                {
+                    CombatLog.Push($"{slot.DisplayName()} 綁定武器「{resolved.BoundWeaponName}」無法使用「{resolved.Action.DisplayName}」");
+                    continue;
+                }
+
                 if (Time.time < cooldownUntil[(int)slot])
                 {
                     continue;
@@ -294,7 +305,8 @@ namespace GamePJ.Combat
             }
 
             cooldownUntil[(int)resolved.Slot] = Time.time + resolved.Cooldown;
-            animatorBridge?.PlayAttack();
+            cooldownTotal[(int)resolved.Slot] = resolved.Cooldown;
+            animatorBridge?.PlayAction(resolved);
             StartCoroutine(ExecuteAttack(resolved, charge, perfect, startup));
         }
 
@@ -312,8 +324,8 @@ namespace GamePJ.Combat
 
             var origin = firePoint != null ? firePoint.position : actor.AimPosition;
             var mousePoint = GetMouseGroundPoint();
-            var weaponRange = equipment != null
-                ? equipment.WeaponMaxRange
+            var weaponRange = resolved.WeaponRange > 0f
+                ? resolved.WeaponRange
                 : CombatRangeRules.MeleeWeaponMaxRange;
             var shape = AttackHitShape.Compute(resolved, transform, mousePoint, weaponRange, charge);
             var label = resolved.Action.DisplayName;
@@ -481,6 +493,12 @@ namespace GamePJ.Combat
                 return;
             }
 
+            if (!resolved.WeaponCompatible)
+            {
+                CombatLog.Push($"閃避綁定武器「{resolved.BoundWeaponName}」無法使用此動作");
+                return;
+            }
+
             if (Time.time < cooldownUntil[(int)ActionSlotId.Dodge])
             {
                 return;
@@ -488,10 +506,12 @@ namespace GamePJ.Combat
 
             isCharging = false;
             cooldownUntil[(int)ActionSlotId.Dodge] = Time.time + resolved.Cooldown;
+            cooldownTotal[(int)ActionSlotId.Dodge] = resolved.Cooldown;
             var direction = motor != null && motor.PlanarVelocity.sqrMagnitude > 0.01f
                 ? motor.PlanarVelocity.normalized
                 : transform.forward;
             motor?.Dash(direction, resolved.DodgeDistance, 0.22f);
+            animatorBridge?.PlayAction(resolved);
             InIFrames = true;
             nextStartupSkip = 1f;
             CombatLog.Push($"翻滾閃避 {resolved.DodgeDistance:0.0}m（無敵 {resolved.IFrameDuration:0.00}s）");
@@ -513,12 +533,20 @@ namespace GamePJ.Combat
                 return;
             }
 
+            if (!resolved.WeaponCompatible)
+            {
+                CombatLog.Push($"格擋綁定武器「{resolved.BoundWeaponName}」無法使用此動作");
+                return;
+            }
+
             if (Time.time < cooldownUntil[(int)ActionSlotId.Parry])
             {
                 return;
             }
 
             cooldownUntil[(int)ActionSlotId.Parry] = Time.time + resolved.Cooldown;
+            cooldownTotal[(int)ActionSlotId.Parry] = resolved.Cooldown;
+            animatorBridge?.PlayAction(resolved);
             InParryWindow = true;
             CombatLog.Push($"進入格擋窗口 {resolved.ParryWindow:0.00}s");
             StartCoroutine(EndParry(resolved.ParryWindow));
@@ -723,6 +751,23 @@ namespace GamePJ.Combat
         public float CooldownRemaining(ActionSlotId slot)
         {
             return Mathf.Max(0f, cooldownUntil[(int)slot] - Time.time);
+        }
+
+        public float GetCooldownTotal(ActionSlotId slot)
+        {
+            return cooldownTotal[(int)slot];
+        }
+
+        public float GetCooldownRemaining01(ActionSlotId slot)
+        {
+            var total = cooldownTotal[(int)slot];
+            if (total <= 0f)
+            {
+                return 0f;
+            }
+
+            var remain = CooldownRemaining(slot);
+            return remain <= 0f ? 0f : remain / total;
         }
     }
 }

@@ -95,8 +95,8 @@ namespace GamePJ.Combat
             var mousePoint = motor != null && motor.TryGetMouseGroundPoint(out var point)
                 ? point
                 : transform.position + transform.forward * 2f;
-            var weaponRange = equipment != null
-                ? equipment.WeaponMaxRange
+            var weaponRange = resolved.WeaponRange > 0f
+                ? resolved.WeaponRange
                 : CombatRangeRules.MeleeWeaponMaxRange;
             return AttackHitShape.Compute(resolved, transform, mousePoint, weaponRange, charge);
         }

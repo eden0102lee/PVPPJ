@@ -33,6 +33,8 @@ namespace GamePJ.Player
         public bool DummyGuardTogglePressedThisFrame { get; private set; }
         public bool WeaponPrevPressedThisFrame { get; private set; }
         public bool WeaponNextPressedThisFrame { get; private set; }
+        public bool SecondaryWeaponPrevPressedThisFrame { get; private set; }
+        public bool SecondaryWeaponNextPressedThisFrame { get; private set; }
         public bool RangeTogglePressedThisFrame { get; private set; }
         public bool UiBlocksGameplay { get; set; }
         public bool UiBlocksAiming { get; set; }
@@ -101,6 +103,8 @@ namespace GamePJ.Player
             DummyGuardTogglePressedThisFrame = keyboard != null && keyboard.hKey.wasPressedThisFrame;
             WeaponPrevPressedThisFrame = !UiBlocksGameplay && keyboard != null && keyboard.minusKey.wasPressedThisFrame;
             WeaponNextPressedThisFrame = !UiBlocksGameplay && keyboard != null && keyboard.equalsKey.wasPressedThisFrame;
+            SecondaryWeaponPrevPressedThisFrame = !UiBlocksGameplay && keyboard != null && keyboard.leftBracketKey.wasPressedThisFrame;
+            SecondaryWeaponNextPressedThisFrame = !UiBlocksGameplay && keyboard != null && keyboard.rightBracketKey.wasPressedThisFrame;
             RangeTogglePressedThisFrame = keyboard != null && keyboard.vKey.wasPressedThisFrame;
         }
     }
