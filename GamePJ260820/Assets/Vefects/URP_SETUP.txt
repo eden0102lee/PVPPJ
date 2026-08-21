@@ -1,0 +1,14 @@
+URP note for this project
+=========================
+
+This Unity 6 project uses URP assets at:
+- Assets/Settings/PC_RPAsset.asset
+- Assets/Settings/Mobile_RPAsset.asset
+
+Both require Depth Texture and Opaque Texture enabled for distortion VFX.
+Use GamePJ > Plugin Setup > Fix URP Depth and Opaque Textures if needed.
+
+BIRP shaders in this folder are demo/legacy. Import
+`Stylized VFX Shader Graph Assets.unitypackage` from the Asset Store for URP production VFX.
+
+See Assets/Docs/PLUGIN_SETUP.md for full setup.
