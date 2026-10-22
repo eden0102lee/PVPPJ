@@ -531,3 +531,9 @@ Editor 選單 **GamePJ → Setup Talent Test Arena** 會建立或重建此場景
 ---
 
 *文件結束 — v0.5 更新：天賦測試場（圓形競技場、沙包、即時詞條驗證）*
+
+## 12. 不對稱 DEMO 實作入口（2026-10-23）
+
+【草案】負責人指示依目前討論的不對稱規則製作 DEMO；本次對局實作以 [ASYMMETRIC_DESIGN.md](ASYMMETRIC_DESIGN.md) 為準，對照見 [GDD_RECONCILIATION.md](GDD_RECONCILIATION.md)。舊章節的對稱核心及天賦測試場內容保留作既有原型參照，不作為新場景終局判定。
+
+新增 `Assets/Scenes/AsymmetricDemo.unity`：60×60 六角格地圖、英雄／冒險家／軍團、任務收束、30 分鐘初始魔王討伐、最高貢獻者暫停選路、獨立五分鐘魔化／護送終局，以及驟死後保留任務復活資格。數值與簡化系統均為【草案】，AI 未改寫既有【已確認】段落。操作與交接見 [DEMO_GUIDE.md](DEMO_GUIDE.md)。
