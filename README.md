@@ -40,3 +40,9 @@ GitHub 單檔上限 100 MB。下列 ToonScapes skybox 貼圖以 Git LFS 追蹤�
 - `TSI_Skybox_Midground_01A.tga`
 
 Clone 後請確認已安裝 [Git LFS](https://git-lfs.com/)。
+
+## 不對稱對局 DEMO（2026-10-23）
+
+開啟 `GamePJ260820/Assets/Scenes/AsymmetricDemo.unity` 或 **GamePJ > Asymmetric Demo > Open Demo**，Play 後選擇英雄／冒險家／軍團。單機玩家與三名 AI 驗證任務成長、魔王討伐、魔化／護送與終局結算。正式連線尚未實作。
+
+目前不對稱規則以 [ASYMMETRIC_DESIGN](Docs/ASYMMETRIC_DESIGN.md) 為準；操作、Windows 建置與 GPT／Cursor 協作見 [DEMO_GUIDE](Docs/DEMO_GUIDE.md)。舊 TalentTestArena 保留。
